@@ -34,14 +34,14 @@
 ## Repository 結構
 
 ```text
-customer-segmentation-report/
-├── SKILL.md
-├── references/
-│   ├── rfm_scoring_rules.md
-│   ├── customer_segment_definitions.md
-│   └── report_structure.md
-├── examples/
-│   ├── example_user_prompt.md
-│   └── example_output_summary.md
+rfm-kmeans-customer-analysis-skill/
+├── README.md
+├── requirements.txt
+├── customer-segmentation-report/
+│   ├── SKILL.md
+│   └── references/
+│       ├── rfm_scoring_rules.md
+│       ├── report_structure.md
+│       └── customer_segment_definitions.md
 └── scripts/
-    └── rfm_kmeans_report_template.py
+    └── rfm_kmeans_report.py
