@@ -1,15 +1,86 @@
 ---
 name: customer-segmentation-report
-description: Use this skill when the user needs to create a customer segmentation report from sales data and customer data. This skill guides the assistant through data inspection, RFM scoring, K-means clustering, customer segment labeling, Excel report planning, visualization design, and management recommendations.
+description: Use this skill when creating customer segmentation reports from sales data and customer data. This skill supports RFM analysis, K-means clustering, Excel report planning, and a direct Python execution workflow.
 ---
 
 # Customer Segmentation Report Skill
 
 ## Purpose
 
-This skill helps transform raw sales data and customer data into a structured customer segmentation report. It is designed for business analysis, customer value classification, and management reporting.
+This skill helps transform raw sales data and customer data into a structured customer segmentation report.
 
-The skill focuses on RFM analysis, K-means clustering, Excel report structure, chart planning, and business recommendations.
+It supports two usage modes:
+
+1. AI-guided workflow: guides the assistant through data inspection, RFM scoring, K-means clustering, customer segment labeling, Excel report planning, visualization design, and management recommendations.
+2. Direct execution workflow: allows users to download the repository ZIP, place Excel files into the `input` folder, and run `一鍵產生報表.bat` to generate an Excel customer segmentation report.
+
+This skill is suitable for business analysis, customer value classification, customer follow-up planning, and management reporting.
+
+## Repository Execution Files
+
+This repository includes:
+
+- `一鍵產生報表.bat`: one-click execution file for Windows users
+- `requirements.txt`: Python package requirements
+- `scripts/rfm_kmeans_report.py`: main Python program for RFM and K-means analysis
+- `input/`: folder for placing sales data and customer data Excel files
+- `output/`: folder for generated customer segmentation report
+
+## Direct Execution Workflow
+
+Use this workflow when the user wants to run the tool directly without asking AI to process the data.
+
+### Step 1: Download the Repository
+
+Download the repository ZIP from GitHub, then unzip the downloaded file.
+
+### Step 2: Place Excel Files
+
+Place sales data and customer data Excel files into the `input` folder.
+
+The file names do not need to be fixed. The program detects files by required columns.
+
+### Step 3: Required Excel Columns
+
+The sales data must include at least:
+
+- `客戶名稱`
+- `銷貨日期`
+- `銷售金額`
+
+The customer data should include at least:
+
+- `客戶名稱`
+
+Optional columns may include:
+
+- `地址`
+- `地區`
+- `聯絡電話`
+- `產品名稱`
+- `品號`
+- `數量`
+- `單價`
+
+If optional columns exist, the program should preserve or merge them into the output report whenever possible.
+
+### Step 4: Run the Tool
+
+Double-click `一鍵產生報表.bat`.
+
+The batch file should:
+
+1. Check the `input` folder
+2. Check whether Python is available
+3. Install required packages from `requirements.txt`
+4. Run `scripts/rfm_kmeans_report.py`
+5. Generate the Excel report
+
+### Step 5: Output Result
+
+The generated report should be saved as:
+
+- `output/客群分析結果報表.xlsx`
 
 ## When to Use This Skill
 
@@ -23,36 +94,39 @@ Use this skill when the user asks to:
 - Create an Excel-based customer analysis report
 - Summarize customer contribution and purchasing behavior
 - Provide management recommendations based on sales data
+- Build a directly executable customer segmentation report generator
 
 ## Required Inputs
 
-Ask the user to provide or confirm the following data when available:
+### Sales Data
 
-1. Sales data
-   - Customer name or customer ID
-   - Transaction date or month
-   - Sales amount
-   - Product name or item code
-   - Quantity
-   - Unit price, if available
+Required fields:
 
-2. Customer data
-   - Customer name or customer ID
-   - Region or address
-   - Contact information, if available
-   - Customer type, if available
+- Customer name or customer ID
+- Transaction date or month
+- Sales amount
 
-3. Analysis settings
-   - Analysis period
-   - Whether returns or negative sales should be excluded
-   - Desired number of clusters for K-means
-   - Report output format
+Recommended fields:
 
-If some fields are missing, continue with the available data and clearly explain the limitation.
+- Product name or item code
+- Quantity
+- Unit price
+- Region or sales area
 
-## Standard Workflow
+### Customer Data
 
-Follow this workflow whenever possible.
+Required field:
+
+- Customer name or customer ID
+
+Recommended fields:
+
+- Region or address
+- Contact information
+- Customer type
+- Responsible salesperson
+
+## Standard Analysis Workflow
 
 ### Step 1: Data Inspection
 
@@ -61,8 +135,8 @@ Check whether the dataset includes the required columns:
 - Customer identifier
 - Sales amount
 - Transaction date or month
-- Quantity
-- Product information
+- Quantity, if available
+- Product information, if available
 
 Identify missing columns, abnormal values, duplicated records, negative sales, blank customer names, and inconsistent formats.
 
@@ -108,7 +182,7 @@ Recommended scoring direction:
 
 The default score range is 1 to 5.
 
-If extreme Monetary values exist, consider using percentile scoring, logarithmic transformation, or capped values to reduce the influence of outliers.
+If extreme Monetary values exist, consider percentile scoring, logarithmic transformation, capped values, or separate review for extremely high-value customers.
 
 ### Step 5: K-means Clustering
 
@@ -131,7 +205,7 @@ Before applying K-means:
 - Decide the number of clusters
 - Use random_state for reproducibility
 
-Recommended default number of clusters: 3
+Recommended default number of clusters: 3.
 
 Suggested cluster labels:
 
@@ -145,28 +219,31 @@ Use `references/customer_segment_definitions.md` for labeling logic.
 
 After clustering, label each group according to its average RFM characteristics.
 
-Example logic:
+High-value customers usually have:
 
-- High-value customers:
-  - High Monetary
-  - High Frequency
-  - Recent purchases
+- High Monetary
+- High Frequency
+- Recent purchases
+- Large sales contribution
 
-- General customers:
-  - Medium Monetary
-  - Medium Frequency
-  - Stable but not outstanding purchases
+General customers usually have:
 
-- At-risk customers:
-  - Low Recency score
-  - Low Frequency
-  - Long time since last purchase
+- Medium Monetary
+- Medium Frequency
+- Stable but not outstanding purchase behavior
+
+At-risk customers usually have:
+
+- Low Recency score
+- Low Frequency
+- Long time since last purchase
+- Declining or inactive purchase behavior
 
 Do not label clusters only by cluster number. Always interpret the average RFM profile of each cluster before assigning names.
 
 ### Step 7: Report Sheet Planning
 
-The Excel report should include the following worksheets:
+The Excel report should include the following worksheets when possible:
 
 1. Report Overview
 2. Customer RFM Summary
@@ -186,7 +263,7 @@ Recommended charts:
 
 - Customer segment distribution chart
 - Sales contribution by customer segment
-- Top 10 or Top 20 customers by sales amount
+- Top customers by sales amount
 - RFM score distribution
 - K-means cluster scatter plot
 - Regional sales comparison
@@ -230,22 +307,38 @@ For at-risk customers:
 
 - Check recent inactivity
 - Contact customers with declining purchase frequency
-- Review price, delivery, or service issues
+- Review price, delivery, product, or service issues
 - Design reactivation strategy
 
 ## Output Requirements
 
-When using this skill, the assistant should provide:
+When using this skill, the assistant or the executable tool should provide:
 
 1. Data inspection summary
-2. RFM calculation explanation
+2. RFM calculation result
 3. Customer segmentation logic
-4. Suggested Excel worksheet structure
-5. Suggested charts
-6. Customer classification rules
-7. Management summary
-8. Actionable recommendations
-9. Python implementation guidance, if requested
+4. Customer classification result
+5. Excel worksheet output
+6. Segment summary
+7. High-value customer list
+8. At-risk or follow-up customer list
+9. Management-oriented explanation or recommendations
+
+## Direct Execution Output
+
+When using the executable workflow, the output Excel file should include:
+
+- 報表總覽
+- 客群分析結果
+- 分群摘要
+- 客戶類型摘要
+- 高價值客戶
+- 需追蹤客戶
+- 負值或退貨資料
+
+The output file should be saved as:
+
+- `output/客群分析結果報表.xlsx`
 
 ## Writing Style
 
@@ -265,3 +358,6 @@ For company reporting use, emphasize practical interpretation and management act
 - If the dataset does not include dates, Recency cannot be calculated accurately.
 - If customer identifiers are inconsistent, customer merging may affect the accuracy of the analysis.
 - If product data is unavailable, product diversity and product preference analysis should be omitted.
+- For direct execution, users must place Excel files into the `input` folder.
+- The Windows batch file requires Python to be installed on the user's computer.
+```
