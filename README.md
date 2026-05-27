@@ -57,12 +57,17 @@ customer_data.xlsx
 ```text
 rfm-kmeans-customer-analysis-skill/
 ├── README.md
+├── 一鍵產生報表.bat
 ├── requirements.txt
-├── customer-segmentation-report/
-│   ├── SKILL.md
-│   └── references/
-│       ├── rfm_scoring_rules.md
-│       ├── report_structure.md
-│       └── customer_segment_definitions.md
-└── scripts/
-    └── rfm_kmeans_report.py
+├── input/
+│   └── .gitkeep
+├── output/
+│   └── .gitkeep
+├── scripts/
+│   └── rfm_kmeans_report.py
+└── customer-segmentation-report/
+    ├── SKILL.md
+    └── references/
+        ├── rfm_scoring_rules.md
+        ├── report_structure.md
+        └── customer_segment_definitions.md
