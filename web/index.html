@@ -3,275 +3,592 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>客群分析決策模型</title>
+  <title>RFM 客群價值分析工具</title>
+
   <style>
+    :root {
+      --bg: #f4f1ea;
+      --panel: #ffffff;
+      --primary: #1f5f5b;
+      --primary-dark: #123f3c;
+      --accent: #e59f45;
+      --accent-soft: #fff1d8;
+      --green-soft: #e7f3ef;
+      --blue-soft: #eaf2f8;
+      --text: #23302f;
+      --muted: #6f7d7b;
+      --line: #d9ded8;
+      --danger: #c75c5c;
+      --shadow: 0 12px 28px rgba(42, 63, 60, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Microsoft JhengHei", Arial, sans-serif;
-      background: #0b0d14;
-      color: #f5f5f5;
+      background:
+        radial-gradient(circle at top left, rgba(229, 159, 69, 0.18), transparent 28%),
+        linear-gradient(135deg, #f7f4ed 0%, #edf4f0 100%);
+      color: var(--text);
     }
 
-    header {
-      padding: 28px 40px;
-      border-bottom: 1px solid #24283a;
-      background: #0d0f18;
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
     }
 
-    header h1 {
-      margin: 0;
-      color: #f2c76e;
-      font-size: 28px;
-      letter-spacing: 2px;
+    aside {
+      background: var(--primary-dark);
+      color: #ffffff;
+      padding: 32px 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
 
-    header p {
-      margin: 8px 0 0;
-      color: #7f89b0;
+    .brand {
+      margin-bottom: 40px;
+    }
+
+    .brand .small {
       font-size: 12px;
-      letter-spacing: 4px;
+      letter-spacing: 3px;
+      color: #a9c8c3;
+      margin-bottom: 10px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.35;
+      color: #ffffff;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .nav-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+
+    .nav-box h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #d8ece8;
+    }
+
+    .nav-box p {
+      margin: 0;
+      font-size: 13px;
+      color: #b6ceca;
+      line-height: 1.7;
+    }
+
+    .side-tag {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(229, 159, 69, 0.16);
+      color: #ffd28d;
+      font-size: 12px;
+      letter-spacing: 1px;
     }
 
     main {
-      max-width: 1100px;
-      margin: 35px auto;
-      padding: 0 20px;
+      padding: 36px;
     }
 
-    .grid {
+    .hero {
+      background: var(--panel);
+      border-radius: 28px;
+      padding: 30px 34px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 26px;
+      border: 1px solid rgba(31, 95, 91, 0.08);
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 30px;
+      color: var(--primary-dark);
+    }
+
+    .hero p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .hero-card {
+      background: var(--green-soft);
+      border-radius: 22px;
+      padding: 22px;
+      border: 1px solid #cddfd9;
+    }
+
+    .hero-card strong {
+      display: block;
+      color: var(--primary);
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .hero-card span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .content-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
     }
 
-    .card {
-      background: #111320;
-      border: 1px solid #272b3f;
-      padding: 28px;
-      border-radius: 6px;
+    .panel {
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(31, 95, 91, 0.08);
     }
 
-    .card h2 {
-      margin-top: 0;
-      color: #8f9ac8;
-      font-size: 15px;
-      letter-spacing: 2px;
-      border-bottom: 1px solid #252a3d;
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
       padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .panel-title h3 {
+      margin: 0;
+      color: var(--primary-dark);
+      font-size: 18px;
     }
 
     label {
       display: block;
-      margin-top: 18px;
-      color: #9aa4cc;
+      margin-top: 16px;
+      color: var(--muted);
       font-size: 14px;
+      font-weight: 600;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
-      box-sizing: border-box;
       margin-top: 8px;
-      padding: 12px;
-      border: 1px solid #292e45;
-      background: #0c0e18;
-      color: #ffffff;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfcfa;
+      color: var(--text);
       font-size: 15px;
-      border-radius: 3px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(31, 95, 91, 0.08);
+    }
+
+    .range-wrap {
+      display: grid;
+      grid-template-columns: 1fr 54px;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
     }
 
     input[type="range"] {
       padding: 0;
+      accent-color: var(--primary);
     }
 
-    .range-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 8px;
+    .range-value {
+      background: var(--accent-soft);
+      color: #9b6218;
+      padding: 9px 0;
+      text-align: center;
+      border-radius: 12px;
+      font-weight: bold;
     }
 
-    .range-row input {
-      flex: 1;
-    }
-
-    .range-row span {
-      color: #f2c76e;
-      width: 50px;
-      text-align: right;
+    .action-area {
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
     button {
-      width: 100%;
-      margin-top: 28px;
-      padding: 14px;
-      background: transparent;
-      color: #f2c76e;
-      border: 1px solid #f2c76e;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 18px;
       cursor: pointer;
       font-weight: bold;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+      font-size: 15px;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background: #f2c76e;
-      color: #0b0d14;
+    .primary-btn {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .secondary-btn {
+      background: var(--accent-soft);
+      color: #9b6218;
+    }
+
+    .secondary-btn:hover {
+      background: #ffe4ad;
     }
 
     .result {
-      margin-top: 24px;
-      background: #111320;
-      border: 1px solid #272b3f;
-      padding: 28px;
-      border-radius: 6px;
       display: none;
+      margin-top: 24px;
+      background: var(--panel);
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(31, 95, 91, 0.08);
     }
 
-    .result h2 {
-      margin-top: 0;
-      color: #f2c76e;
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 24px;
     }
 
-    .score-box {
+    .result-header h2 {
+      margin: 0;
+      color: var(--primary-dark);
+      font-size: 24px;
+    }
+
+    .segment-badge {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--primary);
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .score-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-top: 18px;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
-    .score-item {
-      background: #0c0e18;
-      border: 1px solid #252a3d;
-      padding: 16px;
-      text-align: center;
+    .score-card {
+      background: #f8faf7;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
     }
 
-    .score-item strong {
+    .score-card span {
       display: block;
-      color: #f2c76e;
-      font-size: 24px;
-      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
     }
 
-    .advice {
-      margin-top: 22px;
+    .score-card strong {
+      font-size: 30px;
+      color: var(--primary);
+    }
+
+    .bar {
+      margin-top: 12px;
+      height: 8px;
+      background: #e4e9e4;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 99px;
+    }
+
+    .advice-box {
+      background: var(--blue-soft);
+      border-left: 5px solid var(--primary);
+      border-radius: 18px;
+      padding: 20px;
       line-height: 1.8;
-      color: #d7d9e6;
+      color: #354442;
     }
 
-    .tag {
-      display: inline-block;
-      padding: 6px 12px;
-      border: 1px solid #f2c76e;
-      color: #f2c76e;
-      margin-top: 10px;
+    .explain-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .mini {
+      background: #fffaf1;
+      border: 1px solid #f0dfbd;
+      border-radius: 16px;
+      padding: 14px;
       font-size: 14px;
+      color: #6b5a3c;
+      line-height: 1.6;
     }
 
-    @media (max-width: 800px) {
-      .grid {
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 34px 0 12px;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
-      .score-box {
+      aside {
+        position: relative;
+        height: auto;
+      }
+
+      .hero,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-grid,
+      .explain-grid {
         grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 20px;
+      }
+
+      .action-area,
+      .score-grid,
+      .explain-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-header {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1>客群分析決策模型</h1>
-    <p>CUSTOMER SEGMENTATION DECISION FRAMEWORK v1.0</p>
-  </header>
-
-  <main>
-    <div class="grid">
-      <section class="card">
-        <h2>基本客戶參數</h2>
-
-        <label>客戶名稱</label>
-        <input id="customerName" type="text" placeholder="例如：進成鐵材行" />
-
-        <label>最近一次購買距今天數 Recency</label>
-        <input id="recency" type="number" value="30" min="0" />
-
-        <label>交易次數 Frequency</label>
-        <input id="frequency" type="number" value="5" min="0" />
-
-        <label>累積購買金額 Monetary</label>
-        <input id="monetary" type="number" value="100000" min="0" />
-
-        <label>客戶地區</label>
-        <select id="region">
-          <option>北部</option>
-          <option>中部</option>
-          <option>南部</option>
-          <option>東部</option>
-          <option>其他</option>
-        </select>
-      </section>
-
-      <section class="card">
-        <h2>分析參數設定</h2>
-
-        <label>流失風險敏感度</label>
-        <div class="range-row">
-          <input id="riskLevel" type="range" min="1" max="5" value="3" />
-          <span id="riskText">3</span>
-        </div>
-
-        <label>高價值客戶判斷門檻</label>
-        <select id="highValueStandard">
-          <option value="12">嚴格：RFM 12 分以上</option>
-          <option value="10" selected>一般：RFM 10 分以上</option>
-          <option value="8">寬鬆：RFM 8 分以上</option>
-        </select>
-
-        <label>目前市場需求狀況</label>
-        <select id="marketStatus">
-          <option>需求上升</option>
-          <option selected>需求穩定</option>
-          <option>需求下降</option>
-        </select>
-
-        <label>追蹤策略偏好</label>
-        <select id="strategy">
-          <option>積極追蹤</option>
-          <option selected>一般追蹤</option>
-          <option>低頻追蹤</option>
-        </select>
-
-        <button onclick="analyzeCustomer()">▶ 執行客群分析</button>
-      </section>
-    </div>
-
-    <section id="result" class="result">
-      <h2 id="segmentTitle">分析結果</h2>
-      <div id="segmentTag" class="tag"></div>
-
-      <div class="score-box">
-        <div class="score-item">
-          <strong id="rScore">0</strong>
-          R Score
-        </div>
-        <div class="score-item">
-          <strong id="fScore">0</strong>
-          F Score
-        </div>
-        <div class="score-item">
-          <strong id="mScore">0</strong>
-          M Score
-        </div>
-        <div class="score-item">
-          <strong id="totalScore">0</strong>
-          RFM Total
-        </div>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="small">RFM DECISION TOOL</div>
+        <h1>客群價值<br><span>分層分析</span></h1>
       </div>
 
-      <div id="advice" class="advice"></div>
-    </section>
-  </main>
+      <div class="nav-box">
+        <h3>工具定位</h3>
+        <p>
+          依據 RFM 指標快速判斷單一客戶價值，協助企業進行客戶追蹤、維護與流失風險判斷。
+        </p>
+      </div>
+
+      <div class="nav-box">
+        <h3>分析邏輯</h3>
+        <p>
+          Recency、Frequency、Monetary 三項分數加總後，依門檻判定高價值客戶、一般客戶或可能流失客戶。
+        </p>
+      </div>
+
+      <div class="side-tag">CUSTOMER SEGMENTATION v2.0</div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div>
+          <h2>RFM 客群分析決策模型</h2>
+          <p>
+            輸入客戶最近購買時間、交易次數與累積金額後，系統會自動計算 RFM 分數，
+            並產生客戶類型與管理建議。此網頁可作為客群分析報表 Skill 的簡易互動展示版本。
+          </p>
+        </div>
+
+        <div class="hero-card">
+          <strong>3 Step</strong>
+          <span>輸入資料 → 計算分數 → 產出建議</span>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <div class="panel-title">
+            <div class="dot"></div>
+            <h3>客戶行為資料</h3>
+          </div>
+
+          <label for="customerName">客戶名稱</label>
+          <input id="customerName" type="text" placeholder="例如：進成鐵材行" />
+
+          <label for="recency">最近一次購買距今天數 Recency</label>
+          <input id="recency" type="number" value="30" min="0" />
+
+          <label for="frequency">交易次數 Frequency</label>
+          <input id="frequency" type="number" value="5" min="0" />
+
+          <label for="monetary">累積購買金額 Monetary</label>
+          <input id="monetary" type="number" value="100000" min="0" />
+
+          <label for="region">客戶地區</label>
+          <select id="region">
+            <option>北部</option>
+            <option>中部</option>
+            <option selected>南部</option>
+            <option>東部</option>
+            <option>其他</option>
+          </select>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <div class="dot"></div>
+            <h3>管理判斷設定</h3>
+          </div>
+
+          <label for="riskLevel">流失風險敏感度</label>
+          <div class="range-wrap">
+            <input id="riskLevel" type="range" min="1" max="5" value="3" />
+            <div id="riskText" class="range-value">3</div>
+          </div>
+
+          <label for="highValueStandard">高價值客戶門檻</label>
+          <select id="highValueStandard">
+            <option value="12">嚴格：RFM 12 分以上</option>
+            <option value="10" selected>一般：RFM 10 分以上</option>
+            <option value="8">寬鬆：RFM 8 分以上</option>
+          </select>
+
+          <label for="marketStatus">市場需求狀況</label>
+          <select id="marketStatus">
+            <option>需求上升</option>
+            <option selected>需求穩定</option>
+            <option>需求下降</option>
+          </select>
+
+          <label for="strategy">追蹤策略偏好</label>
+          <select id="strategy">
+            <option>積極追蹤</option>
+            <option selected>一般追蹤</option>
+            <option>低頻追蹤</option>
+          </select>
+
+          <div class="action-area">
+            <button class="primary-btn" onclick="analyzeCustomer()">執行分析</button>
+            <button class="secondary-btn" onclick="resetForm()">重設資料</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="result" class="result">
+        <div class="result-header">
+          <div>
+            <h2 id="resultTitle">分析結果</h2>
+          </div>
+          <div id="segmentBadge" class="segment-badge">客戶類型</div>
+        </div>
+
+        <div class="score-grid">
+          <div class="score-card">
+            <span>Recency Score</span>
+            <strong id="rScore">0</strong>
+            <div class="bar"><div id="rBar"></div></div>
+          </div>
+
+          <div class="score-card">
+            <span>Frequency Score</span>
+            <strong id="fScore">0</strong>
+            <div class="bar"><div id="fBar"></div></div>
+          </div>
+
+          <div class="score-card">
+            <span>Monetary Score</span>
+            <strong id="mScore">0</strong>
+            <div class="bar"><div id="mBar"></div></div>
+          </div>
+
+          <div class="score-card">
+            <span>RFM Total</span>
+            <strong id="totalScore">0</strong>
+            <div class="bar"><div id="totalBar"></div></div>
+          </div>
+        </div>
+
+        <div id="advice" class="advice-box"></div>
+
+        <div class="explain-grid">
+          <div class="mini">
+            <strong>R 指標</strong><br>
+            最近購買時間越近，代表客戶活躍度越高。
+          </div>
+          <div class="mini">
+            <strong>F 指標</strong><br>
+            交易次數越多，代表客戶往來穩定度越高。
+          </div>
+          <div class="mini">
+            <strong>M 指標</strong><br>
+            累積金額越高，代表客戶營收貢獻越大。
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        RFM Customer Segmentation Decision Model ｜ Designed for business reporting and customer follow-up
+      </footer>
+    </main>
+  </div>
 
   <script>
     const riskLevel = document.getElementById("riskLevel");
@@ -305,6 +622,11 @@
       return 1;
     }
 
+    function setBar(id, score, max) {
+      const percent = Math.min((score / max) * 100, 100);
+      document.getElementById(id).style.width = percent + "%";
+    }
+
     function analyzeCustomer() {
       const name = document.getElementById("customerName").value || "未命名客戶";
       const recency = Number(document.getElementById("recency").value);
@@ -326,25 +648,61 @@
 
       if (total >= highValueStandard && r >= 3 && f >= 3) {
         segment = "高價值客戶";
-        advice = `「${name}」屬於高價值客戶，建議列為優先維護對象。可定期追蹤訂單需求，提供較快速的報價與客製化服務，避免流失至競爭對手。`;
+        advice =
+          `「${name}」目前屬於高價值客戶，建議列為優先維護對象。` +
+          `此類客戶具有較高交易價值或穩定購買行為，可安排定期回訪、優先報價與客製化服務，降低流失風險。`;
       } else if (r <= risk || total <= 6) {
         segment = "可能流失客戶";
-        advice = `「${name}」近期交易活躍度偏低，建議進行回訪，了解是否受到價格、交期、產品需求或服務因素影響。若仍具採購潛力，可安排再行銷或重新接觸策略。`;
+        advice =
+          `「${name}」近期交易活躍度偏低，建議列入追蹤名單。` +
+          `可進一步確認是否受到價格、交期、產品需求或服務因素影響，並評估是否進行回訪或再行銷。`;
       } else {
         segment = "一般客戶";
-        advice = `「${name}」目前屬於一般客戶，具備穩定但尚未突出的交易表現。建議持續觀察購買頻率，並可透過產品推薦或定期追蹤提高後續採購機會。`;
+        advice =
+          `「${name}」目前屬於一般客戶，交易表現穩定但尚未達高價值門檻。` +
+          `建議持續觀察購買頻率與金額變化，並透過產品推薦或定期聯繫提升後續採購機會。`;
       }
 
-      advice += `<br><br>客戶地區：${region}<br>市場需求狀況：${marketStatus}<br>建議追蹤策略：${strategy}`;
+      advice +=
+        `<br><br><strong>管理補充：</strong>` +
+        `<br>客戶地區：${region}` +
+        `<br>市場需求狀況：${marketStatus}` +
+        `<br>建議追蹤策略：${strategy}`;
 
       document.getElementById("result").style.display = "block";
-      document.getElementById("segmentTitle").textContent = `${name} 分析結果`;
-      document.getElementById("segmentTag").textContent = segment;
+      document.getElementById("resultTitle").textContent = `${name} 分析結果`;
+      document.getElementById("segmentBadge").textContent = segment;
+
       document.getElementById("rScore").textContent = r;
       document.getElementById("fScore").textContent = f;
       document.getElementById("mScore").textContent = m;
       document.getElementById("totalScore").textContent = total;
+
+      setBar("rBar", r, 5);
+      setBar("fBar", f, 5);
+      setBar("mBar", m, 5);
+      setBar("totalBar", total, 15);
+
       document.getElementById("advice").innerHTML = advice;
+
+      document.getElementById("result").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    function resetForm() {
+      document.getElementById("customerName").value = "";
+      document.getElementById("recency").value = 30;
+      document.getElementById("frequency").value = 5;
+      document.getElementById("monetary").value = 100000;
+      document.getElementById("region").value = "南部";
+      document.getElementById("riskLevel").value = 3;
+      document.getElementById("riskText").textContent = 3;
+      document.getElementById("highValueStandard").value = 10;
+      document.getElementById("marketStatus").value = "需求穩定";
+      document.getElementById("strategy").value = "一般追蹤";
+      document.getElementById("result").style.display = "none";
     }
   </script>
 </body>
