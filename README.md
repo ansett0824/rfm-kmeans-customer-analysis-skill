@@ -31,6 +31,27 @@
 - Excel 自動化報表製作
 - 客戶流失風險初步判斷
 
+## 直接執行方式
+
+本專案除了提供 Skill 文件外，也包含一份 Python 範例程式，可直接執行 RFM 與 K-means 客群分析。
+
+### 1. 下載專案
+
+可從 GitHub 點選：
+
+Code → Download ZIP
+
+下載後解壓縮。
+
+### 2. 準備 Excel 檔案
+
+請將銷貨資料與客戶資料放在專案最外層，並命名為：
+
+```text
+sales_data.xlsx
+customer_data.xlsx
+
+
 ## Repository 結構
 
 ```text
