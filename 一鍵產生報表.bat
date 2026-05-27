@@ -1,88 +1,80 @@
 @echo off
-chcp 65001 >nul
-title RFM 與 K-means 客群分析報表產生工具
-
+setlocal
 cd /d "%~dp0"
 
-if not exist input (
-    mkdir input
-)
-
-if not exist output (
-    mkdir output
-)
+if not exist input mkdir input
+if not exist output mkdir output
 
 echo ==========================================
-echo RFM 與 K-means 客群分析報表產生工具
+echo RFM K-means Customer Report Generator
 echo ==========================================
 echo.
-
-echo 目前執行位置：
+echo Current folder:
 echo %cd%
 echo.
 
-echo [1/5] 檢查 input 資料夾...
-echo input 資料夾內的檔案：
+echo [1/5] Checking input files...
+echo Files in input folder:
 dir input
 echo.
 
-echo 請確認 Excel 檔案已放入 input 資料夾。
-echo 若 Excel 檔案正在開啟，請先關閉 Excel 後再執行。
+echo Please make sure Excel files are placed in the input folder.
+echo Close Excel files before running this tool.
 echo.
 pause
 
 echo.
-echo [2/5] 檢查 Python 是否可用...
+echo [2/5] Checking Python...
 python --version
 
 if errorlevel 1 (
     echo.
-    echo 找不到 Python，請先安裝 Python。
-    echo 安裝時請勾選 Add python.exe to PATH。
+    echo Python was not found.
+    echo Please install Python and check Add python.exe to PATH during installation.
     echo.
     pause
     exit /b 1
 )
 
 echo.
-echo [3/5] 檢查必要檔案...
+echo [3/5] Checking required files...
 
 if not exist requirements.txt (
-    echo 找不到 requirements.txt
+    echo requirements.txt not found.
     pause
     exit /b 1
 )
 
 if not exist scripts\rfm_kmeans_report.py (
-    echo 找不到 scripts\rfm_kmeans_report.py
+    echo scripts\rfm_kmeans_report.py not found.
     pause
     exit /b 1
 )
 
-echo requirements.txt 存在
-echo scripts\rfm_kmeans_report.py 存在
+echo requirements.txt found.
+echo scripts\rfm_kmeans_report.py found.
 
 echo.
-echo [4/5] 安裝必要套件...
+echo [4/5] Installing required packages...
 python -m pip install -r requirements.txt
 
 if errorlevel 1 (
     echo.
-    echo 套件安裝失敗。
-    echo 請確認 Python、pip 或網路連線是否正常。
+    echo Package installation failed.
+    echo Please check Python, pip, and internet connection.
     echo.
     pause
     exit /b 1
 )
 
 echo.
-echo [5/5] 開始產生客群分析報表...
+echo [5/5] Generating report...
 python scripts\rfm_kmeans_report.py
 
 if errorlevel 1 (
     echo.
-    echo 報表產生失敗。
-    echo 請查看 output 資料夾內是否有 error_log.txt。
+    echo Report generation failed.
+    echo Please check output\error_log.txt if it exists.
     echo.
     pause
     exit /b 1
@@ -90,9 +82,9 @@ if errorlevel 1 (
 
 echo.
 echo ==========================================
-echo 執行完成
-echo 報表已產生在 output 資料夾
-echo 檔案名稱：客群分析結果報表.xlsx
+echo Done.
+echo Please check output folder.
+echo Output file: customer segmentation report Excel
 echo ==========================================
 echo.
 
