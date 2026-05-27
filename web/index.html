@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>客群分析決策模型</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", Arial, sans-serif;
+      background: #0b0d14;
+      color: #f5f5f5;
+    }
+
+    header {
+      padding: 28px 40px;
+      border-bottom: 1px solid #24283a;
+      background: #0d0f18;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #f2c76e;
+      font-size: 28px;
+      letter-spacing: 2px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #7f89b0;
+      font-size: 12px;
+      letter-spacing: 4px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 35px auto;
+      padding: 0 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: #111320;
+      border: 1px solid #272b3f;
+      padding: 28px;
+      border-radius: 6px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #8f9ac8;
+      font-size: 15px;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #252a3d;
+      padding-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      color: #9aa4cc;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      padding: 12px;
+      border: 1px solid #292e45;
+      background: #0c0e18;
+      color: #ffffff;
+      font-size: 15px;
+      border-radius: 3px;
+    }
+
+    input[type="range"] {
+      padding: 0;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .range-row input {
+      flex: 1;
+    }
+
+    .range-row span {
+      color: #f2c76e;
+      width: 50px;
+      text-align: right;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 28px;
+      padding: 14px;
+      background: transparent;
+      color: #f2c76e;
+      border: 1px solid #f2c76e;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    button:hover {
+      background: #f2c76e;
+      color: #0b0d14;
+    }
+
+    .result {
+      margin-top: 24px;
+      background: #111320;
+      border: 1px solid #272b3f;
+      padding: 28px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .result h2 {
+      margin-top: 0;
+      color: #f2c76e;
+    }
+
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .score-item {
+      background: #0c0e18;
+      border: 1px solid #252a3d;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .score-item strong {
+      display: block;
+      color: #f2c76e;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .advice {
+      margin-top: 22px;
+      line-height: 1.8;
+      color: #d7d9e6;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #f2c76e;
+      color: #f2c76e;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-box {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>客群分析決策模型</h1>
+    <p>CUSTOMER SEGMENTATION DECISION FRAMEWORK v1.0</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>基本客戶參數</h2>
+
+        <label>客戶名稱</label>
+        <input id="customerName" type="text" placeholder="例如：進成鐵材行" />
+
+        <label>最近一次購買距今天數 Recency</label>
+        <input id="recency" type="number" value="30" min="0" />
+
+        <label>交易次數 Frequency</label>
+        <input id="frequency" type="number" value="5" min="0" />
+
+        <label>累積購買金額 Monetary</label>
+        <input id="monetary" type="number" value="100000" min="0" />
+
+        <label>客戶地區</label>
+        <select id="region">
+          <option>北部</option>
+          <option>中部</option>
+          <option>南部</option>
+          <option>東部</option>
+          <option>其他</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <h2>分析參數設定</h2>
+
+        <label>流失風險敏感度</label>
+        <div class="range-row">
+          <input id="riskLevel" type="range" min="1" max="5" value="3" />
+          <span id="riskText">3</span>
+        </div>
+
+        <label>高價值客戶判斷門檻</label>
+        <select id="highValueStandard">
+          <option value="12">嚴格：RFM 12 分以上</option>
+          <option value="10" selected>一般：RFM 10 分以上</option>
+          <option value="8">寬鬆：RFM 8 分以上</option>
+        </select>
+
+        <label>目前市場需求狀況</label>
+        <select id="marketStatus">
+          <option>需求上升</option>
+          <option selected>需求穩定</option>
+          <option>需求下降</option>
+        </select>
+
+        <label>追蹤策略偏好</label>
+        <select id="strategy">
+          <option>積極追蹤</option>
+          <option selected>一般追蹤</option>
+          <option>低頻追蹤</option>
+        </select>
+
+        <button onclick="analyzeCustomer()">▶ 執行客群分析</button>
+      </section>
+    </div>
+
+    <section id="result" class="result">
+      <h2 id="segmentTitle">分析結果</h2>
+      <div id="segmentTag" class="tag"></div>
+
+      <div class="score-box">
+        <div class="score-item">
+          <strong id="rScore">0</strong>
+          R Score
+        </div>
+        <div class="score-item">
+          <strong id="fScore">0</strong>
+          F Score
+        </div>
+        <div class="score-item">
+          <strong id="mScore">0</strong>
+          M Score
+        </div>
+        <div class="score-item">
+          <strong id="totalScore">0</strong>
+          RFM Total
+        </div>
+      </div>
+
+      <div id="advice" class="advice"></div>
+    </section>
+  </main>
+
+  <script>
+    const riskLevel = document.getElementById("riskLevel");
+    const riskText = document.getElementById("riskText");
+
+    riskLevel.addEventListener("input", function () {
+      riskText.textContent = riskLevel.value;
+    });
+
+    function getRScore(recency) {
+      if (recency <= 30) return 5;
+      if (recency <= 60) return 4;
+      if (recency <= 90) return 3;
+      if (recency <= 180) return 2;
+      return 1;
+    }
+
+    function getFScore(frequency) {
+      if (frequency >= 10) return 5;
+      if (frequency >= 7) return 4;
+      if (frequency >= 4) return 3;
+      if (frequency >= 2) return 2;
+      return 1;
+    }
+
+    function getMScore(monetary) {
+      if (monetary >= 500000) return 5;
+      if (monetary >= 300000) return 4;
+      if (monetary >= 100000) return 3;
+      if (monetary >= 30000) return 2;
+      return 1;
+    }
+
+    function analyzeCustomer() {
+      const name = document.getElementById("customerName").value || "未命名客戶";
+      const recency = Number(document.getElementById("recency").value);
+      const frequency = Number(document.getElementById("frequency").value);
+      const monetary = Number(document.getElementById("monetary").value);
+      const region = document.getElementById("region").value;
+      const highValueStandard = Number(document.getElementById("highValueStandard").value);
+      const marketStatus = document.getElementById("marketStatus").value;
+      const strategy = document.getElementById("strategy").value;
+      const risk = Number(document.getElementById("riskLevel").value);
+
+      const r = getRScore(recency);
+      const f = getFScore(frequency);
+      const m = getMScore(monetary);
+      const total = r + f + m;
+
+      let segment = "";
+      let advice = "";
+
+      if (total >= highValueStandard && r >= 3 && f >= 3) {
+        segment = "高價值客戶";
+        advice = `「${name}」屬於高價值客戶，建議列為優先維護對象。可定期追蹤訂單需求，提供較快速的報價與客製化服務，避免流失至競爭對手。`;
+      } else if (r <= risk || total <= 6) {
+        segment = "可能流失客戶";
+        advice = `「${name}」近期交易活躍度偏低，建議進行回訪，了解是否受到價格、交期、產品需求或服務因素影響。若仍具採購潛力，可安排再行銷或重新接觸策略。`;
+      } else {
+        segment = "一般客戶";
+        advice = `「${name}」目前屬於一般客戶，具備穩定但尚未突出的交易表現。建議持續觀察購買頻率，並可透過產品推薦或定期追蹤提高後續採購機會。`;
+      }
+
+      advice += `<br><br>客戶地區：${region}<br>市場需求狀況：${marketStatus}<br>建議追蹤策略：${strategy}`;
+
+      document.getElementById("result").style.display = "block";
+      document.getElementById("segmentTitle").textContent = `${name} 分析結果`;
+      document.getElementById("segmentTag").textContent = segment;
+      document.getElementById("rScore").textContent = r;
+      document.getElementById("fScore").textContent = f;
+      document.getElementById("mScore").textContent = m;
+      document.getElementById("totalScore").textContent = total;
+      document.getElementById("advice").innerHTML = advice;
+    }
+  </script>
+</body>
+</html>
